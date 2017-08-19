@@ -63,6 +63,9 @@ static gint show_pref = -1;
 static gboolean desktop_pref = FALSE;
 static char* set_wallpaper = NULL;
 static char* wallpaper_mode = NULL;
+static char* wallpaper_bg_color = NULL;
+static char* desktop_text_color = NULL;
+static char* desktop_shadow_color = NULL;
 static gboolean new_win = FALSE;
 #if FM_CHECK_VERSION(1, 0, 2)
 static gboolean find_files = FALSE;
@@ -87,6 +90,9 @@ static GOptionEntry opt_entries[] =
     { "set-wallpaper", 'w', 0, G_OPTION_ARG_FILENAME, &set_wallpaper, N_("Set desktop wallpaper from image FILE"), N_("FILE") },
                     /* don't translate list of modes in description, please */
     { "wallpaper-mode", '\0', 0, G_OPTION_ARG_STRING, &wallpaper_mode, N_("Set mode of desktop wallpaper. MODE=(color|stretch|fit|crop|center|tile|screen)"), N_("MODE") },
+    { "wallpaper-bg-color", '\0', 0, G_OPTION_ARG_STRING, &wallpaper_bg_color, N_("Set background color of desktop wallpaper (hex notation, .e.g #000000)."), "C" },
+    { "desktop-text-color", '\0', 0, G_OPTION_ARG_STRING, &desktop_text_color, N_("Set color of desktop icons text (hex notation, .e.g #FFFFFF)."), "C" },
+    { "desktop-shadow-color", '\0', 0, G_OPTION_ARG_STRING, &desktop_shadow_color, N_("Set color of desktop icons text shadow (hex notation, .e.g #888888)."), "C" },
     { "show-pref", '\0', 0, G_OPTION_ARG_INT, &show_pref, N_("Open Preferences dialog on the page N"), N_("N") },
     { "new-win", 'n', 0, G_OPTION_ARG_NONE, &new_win, N_("Open new window"), NULL },
 #if FM_CHECK_VERSION(1, 0, 2)
@@ -320,6 +326,12 @@ static gboolean reset_options(void)
     set_wallpaper = NULL;
     g_free(wallpaper_mode);
     wallpaper_mode = NULL;
+    g_free(wallpaper_bg_color);
+    wallpaper_bg_color = NULL;
+    g_free(desktop_text_color);
+    desktop_text_color = NULL;
+    g_free(desktop_shadow_color);
+    desktop_shadow_color = NULL;
     show_pref = -1;
     new_win = FALSE;
 #if FM_CHECK_VERSION(1, 0, 2)
@@ -370,7 +382,8 @@ gboolean pcmanfm_run(gint screen_num)
         else if(desktop == NULL)
         {
             /* ignore desktop-oriented commands if no desktop support */
-            if (desktop_pref || wallpaper_mode || set_wallpaper)
+            if (desktop_pref || wallpaper_mode || set_wallpaper ||
+                    wallpaper_bg_color || desktop_text_color || desktop_shadow_color)
             {
                 /* FIXME: add "on this X screen/monitor" into diagnostics */
                 fm_show_error(NULL, NULL, _("Desktop manager is not active."));
@@ -383,7 +396,8 @@ gboolean pcmanfm_run(gint screen_num)
             fm_desktop_preference(NULL, desktop);
             return reset_options();
         }
-        else if(wallpaper_mode || set_wallpaper)
+        else if(wallpaper_mode || set_wallpaper ||
+                wallpaper_bg_color || desktop_text_color || desktop_shadow_color)
         {
             gboolean wallpaper_changed = FALSE;
             if(set_wallpaper) /* a new wallpaper is assigned */
@@ -418,6 +432,38 @@ gboolean pcmanfm_run(gint screen_num)
                 }
             }
 
+            if(wallpaper_bg_color)
+            {
+                GdkColor color;
+                gboolean parsing_ok = gdk_color_parse(wallpaper_bg_color,&color);
+                if (parsing_ok && !gdk_color_equal(&color, &desktop->conf.desktop_bg))
+                {
+                    desktop->conf.desktop_bg = color;
+                    wallpaper_changed = TRUE;
+                }
+            }
+
+            if(desktop_text_color)
+            {
+                GdkColor color;
+                gboolean parsing_ok = gdk_color_parse(desktop_text_color,&color);
+                if (parsing_ok && !gdk_color_equal(&color, &desktop->conf.desktop_fg))
+                {
+                    desktop->conf.desktop_fg = color;
+                    wallpaper_changed = TRUE;
+                }
+            }
+
+            if(desktop_shadow_color)
+            {
+                GdkColor color;
+                gboolean parsing_ok = gdk_color_parse(desktop_shadow_color,&color);
+                if (parsing_ok && !gdk_color_equal(&color, &desktop->conf.desktop_shadow))
+                {
+                    desktop->conf.desktop_shadow = color;
+                    wallpaper_changed = TRUE;
+                }
+            }
             if(wallpaper_changed)
                 fm_desktop_wallpaper_changed(desktop);
 
