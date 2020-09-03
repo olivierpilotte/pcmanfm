@@ -526,6 +526,7 @@ static void fm_app_config_init(FmAppConfig *cfg)
     cfg->tb.new_win = FALSE;
     cfg->autorun_choices = g_hash_table_new_full(g_str_hash, g_str_equal,
                                                  g_free, _free_archoice);
+    cfg->show_menubar = TRUE;
     cfg->show_statusbar = TRUE;
 #if FM_CHECK_VERSION(1, 2, 0)
     cfg->home_path = NULL;
@@ -770,6 +771,7 @@ void fm_app_config_load_from_key_file(FmAppConfig* cfg, GKeyFile* kf)
         }
         g_strfreev(tmpv);
     }
+    fm_key_file_get_bool(kf, "ui", "show_menubar", &cfg->show_menubar);
     fm_key_file_get_bool(kf, "ui", "show_statusbar", &cfg->show_statusbar);
     if (g_key_file_has_group(kf, "autorun"))
     {
@@ -1170,6 +1172,7 @@ void fm_app_config_save_profile(FmAppConfig* cfg, const char* name)
         if (cfg->tb.home)
             g_string_append(buf, "home;");
         g_string_append_c(buf, '\n');
+        g_string_append_printf(buf, "show_menubar=%d\n", cfg->show_menubar);
         g_string_append_printf(buf, "show_statusbar=%d\n", cfg->show_statusbar);
         g_string_append_printf(buf, "pathbar_mode_buttons=%d\n", cfg->pathbar_mode_buttons);
 

@@ -144,6 +144,7 @@ struct _FmAppConfig
     GtkSortType sort_type;
     int sort_by;
 #endif
+    gboolean show_menubar;
     gboolean show_statusbar;
 #if FM_CHECK_VERSION(1, 2, 0)
     char *home_path;

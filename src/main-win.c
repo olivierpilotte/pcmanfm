@@ -107,6 +107,7 @@ static void on_toolbar_new_win(GtkToggleAction *act, FmMainWin *win);
 static void on_toolbar_new_tab(GtkToggleAction *act, FmMainWin *win);
 static void on_toolbar_nav(GtkToggleAction *act, FmMainWin *win);
 static void on_toolbar_home(GtkToggleAction *act, FmMainWin *win);
+static void on_show_menubar(GtkToggleAction *action, FmMainWin *win);
 static void on_show_status(GtkToggleAction *action, FmMainWin *win);
 static void on_change_mode(GtkRadioAction* act, GtkRadioAction *cur, FmMainWin* win);
 static void on_sort_by(GtkRadioAction* act, GtkRadioAction *cur, FmMainWin* win);
@@ -913,7 +914,8 @@ static void fm_main_win_init(FmMainWin *win)
     }
 #endif
 
-    menubar = gtk_ui_manager_get_widget(ui, "/menubar");
+    // menubar = gtk_ui_manager_get_widget(ui, "/menubar");
+    win->menubar = GTK_TOOLBAR(gtk_ui_manager_get_widget(ui, "/menubar"));
     win->toolbar = GTK_TOOLBAR(gtk_ui_manager_get_widget(ui, "/toolbar"));
     /* FIXME: should make these optional */
     gtk_toolbar_set_icon_size(win->toolbar, GTK_ICON_SIZE_SMALL_TOOLBAR);
@@ -946,7 +948,8 @@ static void fm_main_win_init(FmMainWin *win)
     if (atk_obj)
         atk_object_set_name(atk_obj, _("History"));
 
-    gtk_box_pack_start( vbox, menubar, FALSE, TRUE, 0 );
+    // gtk_box_pack_start( vbox, menubar, FALSE, TRUE, 0 );
+    gtk_box_pack_start( vbox, GTK_WIDGET(win->menubar), FALSE, TRUE, 0 );
     gtk_box_pack_start( vbox, GTK_WIDGET(win->toolbar), FALSE, TRUE, 0 );
 
     /* load bookmarks menu */
@@ -1720,6 +1723,10 @@ FmMainWin* fm_main_win_add_win(FmMainWin* win, FmPath* path)
     act = gtk_ui_manager_get_action(win->ui, "/menubar/ViewMenu/ShowStatus");
     gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(act), app_config->show_statusbar);
     gtk_widget_set_visible(GTK_WIDGET(win->statusbar), app_config->show_statusbar);
+    /* the same for menu bar */
+    act = gtk_ui_manager_get_action(win->ui, "/menubar/ViewMenu/ShowMenuBar");
+    gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(act), app_config->show_menubar);
+    gtk_widget_set_visible(GTK_WIDGET(win->menubar), app_config->show_menubar);
     /* the same for path bar mode */
     gtk_widget_hide(GTK_WIDGET(win->path_bar));
     act = gtk_ui_manager_get_action(win->ui, "/menubar/ViewMenu/PathMode/PathEntry");
@@ -2684,6 +2691,20 @@ static void on_show_status(GtkToggleAction *action, FmMainWin *win)
     {
         app_config->show_statusbar = active;
         fm_config_emit_changed(fm_config, "statusbar");
+        pcmanfm_save_config(FALSE);
+    }
+}
+
+static void on_show_menubar(GtkToggleAction *action, FmMainWin *win)
+{
+    gboolean active;
+
+    active = gtk_toggle_action_get_active(action);
+    if (active != app_config->show_menubar)
+    {
+        app_config->show_menubar = active;
+        fm_config_emit_changed(fm_config, "menubar");
+        gtk_widget_set_visible(GTK_WIDGET(win->menubar), active);
         pcmanfm_save_config(FALSE);
     }
 }

@@ -119,6 +119,7 @@ static const char main_menu_xml[] =
       "<menuitem action='DirTree' />"
 #endif
     "</menu>"
+    "<menuitem action='ShowMenuBar'/>"
     "<menuitem action='ShowStatus'/>"
     "<separator/>"
     "<menuitem action='DualPane'/>"
@@ -284,6 +285,7 @@ static GtkToggleActionEntry main_win_toggle_actions[]=
     {"ToolbarNav", NULL, N_("Show _Navigation Buttons"), NULL, NULL, G_CALLBACK(on_toolbar_nav), TRUE},
     {"ToolbarHome", NULL, N_("Show '_Home' Button"), NULL, NULL, G_CALLBACK(on_toolbar_home), TRUE},
     {"ShowSidePane", NULL, N_("Sho_w Side Pane"), "F9", NULL, G_CALLBACK(on_show_side_pane), TRUE},
+    {"ShowMenuBar", NULL, N_("Show Menu _Bar"), "<Ctrl>M", NULL, G_CALLBACK(on_show_menubar), TRUE},
     {"ShowStatus", NULL, N_("Show Status B_ar"), "<Ctrl>B", NULL, G_CALLBACK(on_show_status), TRUE},
     {"DualPane", NULL, N_("_Dual Pane Mode"), "F3", N_("Show two panels with folder views"), G_CALLBACK(on_dual_pane), FALSE},
     {"Fullscreen", NULL, N_("Fullscreen _Mode"), "F11", NULL, G_CALLBACK(on_fullscreen), FALSE}
